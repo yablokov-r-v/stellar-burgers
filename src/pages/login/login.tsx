@@ -1,8 +1,7 @@
 import { FC, SyntheticEvent, useState } from 'react';
 import { LoginUI } from '@ui-pages';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from '../../services/store';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppDispatch } from '../../services/store';
 import { loginUser } from '../../services/slices/userSlice';
 
 export const Login: FC = () => {
@@ -11,7 +10,7 @@ export const Login: FC = () => {
   const [errorText, setErrorText] = useState('');
 
   const location = useLocation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const from = location.state?.from?.pathname || '/';
 

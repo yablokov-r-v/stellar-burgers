@@ -8,5 +8,9 @@ export const OrdersList: FC<OrdersListProps> = memo(({ orders }) => {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
+  if (orders.length === 0) {
+    return <div>Нет заказов для отображения</div>;
+  }
+
   return <OrdersListUI orderByDate={orderByDate} />;
 });

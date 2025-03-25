@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { TConstructorIngredient, TOrder } from '@utils-types';
+import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
 import { orderBurgerApi } from '../../utils/burger-api';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ConstructorState {
   bun: TConstructorIngredient | null;
@@ -30,16 +31,24 @@ const burgerConstructorSlice = createSlice({
   name: 'burgerConstructor',
   initialState,
   reducers: {
-    addIngredient: (state, action: PayloadAction<TConstructorIngredient>) => {
-      const ingredient = action.payload;
-      state.ingredients.push(ingredient);
+    addIngredient: {
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        const ingredient = action.payload;
+        state.ingredients.push(ingredient);
 
-      // Увеличиваем счётчик для этого ингредиента
-      if (state.ingredientsCounters[ingredient._id]) {
-        state.ingredientsCounters[ingredient._id] += 1;
-      } else {
-        state.ingredientsCounters[ingredient._id] = 1;
-      }
+        // Увеличиваем счётчик для этого ингредиента
+        if (state.ingredientsCounters[ingredient._id]) {
+          state.ingredientsCounters[ingredient._id] += 1;
+        } else {
+          state.ingredientsCounters[ingredient._id] = 1;
+        }
+      },
+      prepare: (ingredient: TIngredient) => ({
+        payload: {
+          ...ingredient,
+          id: uuidv4()
+        }
+      })
     },
     removeIngredient: (state, action: PayloadAction<string>) => {
       const ingredientId = action.payload;
@@ -65,18 +74,28 @@ const burgerConstructorSlice = createSlice({
         );
       }
     },
-    setBun: (state, action: PayloadAction<TConstructorIngredient>) => {
-      // Очищаем счётчик для старой булки
-      if (state.bun) {
-        delete state.ingredientsCounters[state.bun._id];
-      }
 
-      // Устанавливаем новую булку
-      state.bun = action.payload;
+    setBun: {
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        // Очищаем счётчик для старой булки
+        if (state.bun) {
+          delete state.ingredientsCounters[state.bun._id];
+        }
 
-      // Для новой булки счётчик всегда равен 2
-      state.ingredientsCounters[action.payload._id] = 2;
+        // Устанавливаем новую булку
+        state.bun = action.payload;
+
+        // Для новой булки счётчик всегда равен 2
+        state.ingredientsCounters[action.payload._id] = 2;
+      },
+      prepare: (ingredient: TIngredient) => ({
+        payload: {
+          ...ingredient,
+          id: uuidv4()
+        }
+      })
     },
+
     moveIngredientUp: (state, action: PayloadAction<number>) => {
       const index = action.payload;
       if (index > 0) {

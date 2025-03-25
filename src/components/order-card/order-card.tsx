@@ -1,9 +1,9 @@
 import { FC, memo, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-
 import { OrderCardProps } from './type';
 import { TIngredient } from '@utils-types';
 import { OrderCardUI } from '../ui/order-card';
+import { useSelector } from '../../services/store';
 
 const maxIngredients = 6;
 
@@ -11,10 +11,21 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
   const location = useLocation();
 
   /** TODO: взять переменную из стора */
-  const ingredients: TIngredient[] = [];
+  const ingredients = useSelector((state) => state.ingredients.items);
+  const ingredientsStatus = useSelector((state) => state.ingredients.status);
+
+  if (ingredientsStatus === 'loading') {
+    return <div>Загрузка ингредиентов...</div>;
+  }
+
+  if (ingredientsStatus === 'failed') {
+    return <div>Ошибка загрузки ингредиентов</div>;
+  }
 
   const orderInfo = useMemo(() => {
-    if (!ingredients.length) return null;
+    if (!ingredients.length) {
+      return null;
+    }
 
     const ingredientsInfo = order.ingredients.reduce(
       (acc: TIngredient[], item: string) => {
@@ -45,7 +56,9 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
     };
   }, [order, ingredients]);
 
-  if (!orderInfo) return null;
+  if (!orderInfo) {
+    return <div>Не удалось сформировать информацию о заказе</div>;
+  }
 
   return (
     <OrderCardUI
